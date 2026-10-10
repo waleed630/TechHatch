@@ -94,7 +94,7 @@ const JobSearch = () => {
 
   const clearFilters = () => {
     setFilters({
-      keyword:filters.keyword,
+      keyword: '',
       location: '',
       jobType: '',
       experienceLevel: '',
