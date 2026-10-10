@@ -51,7 +51,7 @@ public class SecurityConfig{
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/api/v1/auth/me").authenticated()
                         .requestMatchers("/","/api/v1/auth/**","/test","/error","/webjars/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/jobs").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/jobs", "/api/v1/jobs/{id:\\d+}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling( ex -> ex
