@@ -102,7 +102,7 @@ const MyJobs = () => {
                       <StatusBadge status={job.status} />
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{job.location}</p>
-                    <div className="mt-3 grid grid-cols-3 gap-4 text-sm">
+                    <div className="mt-3 grid grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground">Posted:</span>{' '}
                         <span className="font-medium">{formatDate(job.postedDate)}</span>
@@ -114,6 +114,10 @@ const MyJobs = () => {
                       <div>
                         <span className="text-muted-foreground">Applications:</span>{' '}
                         <span className="font-medium">{job.applicationCount || 0}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Views:</span>{' '}
+                        <span className="font-medium">{job.viewCount || 0}</span>
                       </div>
                     </div>
                   </div>

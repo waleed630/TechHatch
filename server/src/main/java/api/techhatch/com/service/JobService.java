@@ -97,13 +97,24 @@ public class JobService {
         return jobs.map(this::mapToResponse);
     }
 
-    @Transactional(readOnly = true)
-    public JobResponse getJobById(Long id){
+    /**
+     * Get a job and count the view
+     * @param viewerEmail email of the logged in user, null when not logged in
+     */
+    public JobResponse getJobById(Long id, String viewerEmail){
 
          Job job = jobRepo.findById(id)
                  .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
          JobResponse response = mapToResponse(job);
+
+         //the recruiter looking at their own job is not a view
+         boolean isOwner = job.getRecruiterProfile().getUser().getEmail().equals(viewerEmail);
+         if (!isOwner) {
+             jobRepo.incrementViewCount(id);
+             response.setViewCount((job.getViewCount() == null ? 0 : job.getViewCount()) + 1);
+         }
+
          response.setMessage("Job fetched");
          return response;
     }

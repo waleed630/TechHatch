@@ -80,8 +80,12 @@ public class JobController {
      * Get job by ID (Public - increments view count)
      */
     @GetMapping("/{id}")
-    public ResponseEntity<JobResponse> getJobById(@PathVariable Long id) {
-        JobResponse response = jobService.getJobById(id);
+    public ResponseEntity<JobResponse> getJobById(
+            @AuthenticationPrincipal UserPrinciple userPrinciple,
+            @PathVariable Long id) {
+
+        String viewerEmail = userPrinciple != null ? userPrinciple.getUsername() : null;
+        JobResponse response = jobService.getJobById(id, viewerEmail);
         return ResponseEntity.ok(response);
     }
 
