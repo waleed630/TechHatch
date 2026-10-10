@@ -17,6 +17,7 @@ const CandidateProfile = () => {
   const [saving, setSaving] = useState(false);
   const [profileExists, setProfileExists] = useState(false);
   const [resumeUrl, setResumeUrl] = useState('');
+  const [pictureUrl, setPictureUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -52,6 +53,7 @@ const CandidateProfile = () => {
       });
       setProfileExists(true);
       setResumeUrl(data.resumeUrl || '');
+      setPictureUrl(data.profilePictureUrl || '');
     } catch (error) {
       // Profile doesn't exist yet
     } finally {
@@ -83,6 +85,28 @@ const CandidateProfile = () => {
       toast.success(data.message || 'Resume uploaded successfully');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to upload resume');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handlePictureUpload = async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Picture must be smaller than 2 MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const data = await fileService.uploadProfilePicture(file);
+      setPictureUrl(data.url);
+      toast.success(data.message || 'Profile picture uploaded successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to upload picture');
     } finally {
       setUploading(false);
     }
@@ -137,6 +161,36 @@ const CandidateProfile = () => {
           <p className="mb-8 text-muted-foreground">
             Complete your profile to start applying for jobs
           </p>
+
+          {profileExists && (
+            <div className="mb-6 space-y-3 rounded-lg border bg-card p-8">
+              <h2 className="text-xl font-semibold text-foreground">Profile Picture</h2>
+              <div className="flex items-center gap-6">
+                {pictureUrl ? (
+                  <img
+                    src={fileService.publicUrl(pictureUrl)}
+                    alt="Profile"
+                    className="h-24 w-24 rounded-full border object-cover"
+                  />
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full border bg-muted text-xs text-muted-foreground">
+                    No picture
+                  </div>
+                )}
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="picture">{pictureUrl ? 'Change Picture' : 'Upload Picture'}</Label>
+                  <Input
+                    id="picture"
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.webp"
+                    onChange={handlePictureUpload}
+                    disabled={uploading}
+                  />
+                  <p className="text-xs text-muted-foreground">PNG, JPG or WEBP, up to 2 MB</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mb-6 space-y-3 rounded-lg border bg-card p-8">
             <h2 className="text-xl font-semibold text-foreground">Resume</h2>

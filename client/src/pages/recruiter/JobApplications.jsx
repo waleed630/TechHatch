@@ -175,6 +175,13 @@ const JobApplications = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
+                      {app.candidate.profilePictureUrl && (
+                        <img
+                          src={fileService.publicUrl(app.candidate.profilePictureUrl)}
+                          alt={app.candidate.fullName}
+                          className="h-12 w-12 rounded-full border object-cover"
+                        />
+                      )}
                       <h3 className="text-xl font-semibold text-foreground">
                         {app.candidate.fullName}
                       </h3>
