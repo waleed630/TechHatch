@@ -46,6 +46,7 @@ public class JobController {
      */
     @GetMapping
     public ResponseEntity<Page<JobResponse>> searchJobs(
+            @AuthenticationPrincipal UserPrinciple userPrinciple,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(required = false) String location,
             @RequestParam(required = false) String jobType,
@@ -67,6 +68,8 @@ public class JobController {
         filter.setPage(page);
         filter.setFromDate(fromDate);
         filter.setToDate(toDate);
+        //a logged in candidate does not see jobs they already applied to
+        if (userPrinciple != null) filter.setCandidateEmail(userPrinciple.getUsername());
 
         Page<JobResponse> jobs = jobService.searchJobs(filter);
         return ResponseEntity.ok(jobs);

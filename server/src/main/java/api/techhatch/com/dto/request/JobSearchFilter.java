@@ -17,5 +17,7 @@ public class JobSearchFilter {
     private BigDecimal maxSalary;
     private LocalDateTime fromDate;
     private LocalDateTime toDate;
+    //email of the logged in user, jobs they already applied to are left out
+    private String candidateEmail;
     private int page=0;
 }

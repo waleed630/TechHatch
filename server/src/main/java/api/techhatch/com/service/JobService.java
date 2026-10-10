@@ -89,6 +89,7 @@ public class JobService {
                 filter.getMaxSalary(),
                 filter.getFromDate(),
                 filter.getToDate(),
+                filter.getCandidateEmail(),
                 pageable
         );
         return jobs.map(this::mapToResponse);

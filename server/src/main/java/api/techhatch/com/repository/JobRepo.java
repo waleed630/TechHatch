@@ -30,6 +30,9 @@ public interface JobRepo extends JpaRepository<Job, Long> {
                         AND (:maxSalary IS NULL OR j.salaryMin <= :maxSalary)
                         AND (:fromDate IS NULL OR j.postedDate >= :fromDate)
                         AND (:toDate IS NULL OR j.postedDate <= :toDate)
+                        AND (:candidateEmail IS NULL OR NOT EXISTS (
+                            SELECT a.id FROM JobApplication a
+                            WHERE a.job = j AND a.candidateProfile.user.email = :candidateEmail))
             """)
     Page<Job> searchJobs(
             @Param("keyword") String keyword,
@@ -40,6 +43,7 @@ public interface JobRepo extends JpaRepository<Job, Long> {
             @Param("maxSalary") BigDecimal maxSalary,
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
+            @Param("candidateEmail") String candidateEmail,
             Pageable pageable
     );
 
