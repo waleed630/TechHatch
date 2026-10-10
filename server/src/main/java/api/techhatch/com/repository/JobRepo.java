@@ -21,6 +21,7 @@ public interface JobRepo extends JpaRepository<Job, Long> {
     @Query(value = """
             Select j FROM Job j WHERE
                         j.jobStatus ='ACTIVE'
+                        AND (j.expiryDate IS NULL OR j.expiryDate > :now)
                         AND (:keyword IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
                             OR LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
                         AND (:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%')))
@@ -44,6 +45,7 @@ public interface JobRepo extends JpaRepository<Job, Long> {
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
             @Param("candidateEmail") String candidateEmail,
+            @Param("now") LocalDateTime now,
             Pageable pageable
     );
 

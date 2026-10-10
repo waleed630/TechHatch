@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -90,6 +91,7 @@ public class JobService {
                 filter.getFromDate(),
                 filter.getToDate(),
                 filter.getCandidateEmail(),
+                LocalDateTime.now(),
                 pageable
         );
         return jobs.map(this::mapToResponse);
@@ -275,7 +277,9 @@ public class JobService {
                 .currency(job.getCurrency())
                 .salaryRange(formatSalaryRange(job.getSalaryMin(), job.getSalaryMax(), job.getCurrency()))
                 .requiredSkills(convertJsonToSkills(job.getRequiredSkills()))
-                .status(job.getJobStatus().toString())
+                //an active job past its expiry date is shown as expired
+                .status(job.getJobStatus() == Job.JobStatus.ACTIVE && job.isExpired()
+                        ? Job.JobStatus.EXPIRED.toString() : job.getJobStatus().toString())
                 .postedDate(job.getPostedDate().toString())
                 .expiryDate(job.getExpiryDate().toString())
                 .viewCount(job.getViewCount())
