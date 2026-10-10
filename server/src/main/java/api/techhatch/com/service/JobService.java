@@ -132,6 +132,22 @@ public class JobService {
         return jobs.map(this::mapToResponse);
     }
 
+    /**
+     * Totals for the recruiter dashboard, counted over all jobs and not only one page
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Long> getMyJobStats(String email){
+
+        Map<String, Long> stats = new LinkedHashMap<>();
+        Optional<RecruiterProfile> recruiterProfile = recruiterRepo.findByUserEmail(email);
+        Long recruiterId = recruiterProfile.map(RecruiterProfile::getId).orElse(null);
+
+        stats.put("totalJobs", recruiterId == null ? 0 : jobRepo.countByRecruiterProfileId(recruiterId));
+        stats.put("activeJobs", recruiterId == null ? 0 : jobRepo.countActiveJobs(recruiterId, LocalDateTime.now()));
+        stats.put("totalApplications", recruiterId == null ? 0 : jobRepo.sumApplications(recruiterId));
+        return stats;
+    }
+
     public JobResponse updateJob(String email, Long jobId, JobCreateRequest request){
         Job job = jobRepo.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));

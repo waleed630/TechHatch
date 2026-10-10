@@ -9,6 +9,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Label } from '../../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import StatusBadge from '../../components/common/StatusBadge';
+import Pagination from '../../components/common/Pagination';
 import { formatDate } from '../../utils/formatters';
 import { APPLICATION_STATUS } from '../../utils/constants';
 import { UserCircle, Mail, Phone, Briefcase, Calendar } from 'lucide-react';
@@ -27,12 +28,12 @@ const JobApplications = () => {
   const [pagination, setPagination] = useState({
     page: 0,
     totalPages: 0,
-    size: 25,
+    totalElements: 0,
   });
   
   useEffect(() => {
     fetchData();
-  }, [id, statusFilter]);
+  }, [id, statusFilter, pagination.page]);
 
   const fetchData = async () => {
     try {
@@ -58,7 +59,7 @@ const JobApplications = () => {
       });
       setStatusUpdate(initialStatus);
       setPagination((prev) => ({
-        ...prev, totalPages:appsData.totalPages
+        ...prev, totalPages:appsData.totalPages, totalElements:appsData.totalElements
       }));
     } catch (error) {
       toast.error('Failed to load applications');
@@ -76,10 +77,11 @@ const JobApplications = () => {
         [field]: value,
       },
     }));
-    setPagination((prev) => ({
-      ...prev, 
-      page:0
-    }))
+  };
+
+  const handleFilterChange = (value) => {
+    setStatusFilter(value);
+    setPagination((prev) => ({ ...prev, page: 0 })); // Reset to first page
   };
   
   const handleViewResume = async (app) => {
@@ -132,7 +134,7 @@ const JobApplications = () => {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground">{job?.title}</h1>
             <p className="text-muted-foreground">
-              {applications.length} application{applications.length !== 1 ? 's' : ''}
+              {pagination.totalElements} application{pagination.totalElements !== 1 ? 's' : ''}
             </p>
           </div>
           
@@ -142,7 +144,7 @@ const JobApplications = () => {
             <div className="flex px-3">
               <Select 
                   value = {statusFilter}
-                  onValueChange = {(value) => setStatusFilter(value)}
+                  onValueChange = {handleFilterChange}
               >
                 <SelectTrigger id='status-filter'> 
                   <SelectValue />
@@ -291,6 +293,11 @@ const JobApplications = () => {
                 </div>
               </div>
             ))}
+            <Pagination
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+            />
           </div>
         )}
       </div>

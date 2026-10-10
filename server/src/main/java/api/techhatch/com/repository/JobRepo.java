@@ -18,6 +18,20 @@ public interface JobRepo extends JpaRepository<Job, Long> {
 
     Page<Job> findByRecruiterProfileId(Long recruiterId, Pageable pageable);
 
+    long countByRecruiterProfileId(Long recruiterId);
+
+    //active jobs that have not passed their expiry date
+    @Query("""
+            SELECT COUNT(j) FROM Job j WHERE
+                        j.recruiterProfile.id = :recruiterId
+                        AND j.jobStatus = 'ACTIVE'
+                        AND (j.expiryDate IS NULL OR j.expiryDate > :now)
+            """)
+    long countActiveJobs(@Param("recruiterId") Long recruiterId, @Param("now") LocalDateTime now);
+
+    @Query("SELECT COALESCE(SUM(j.applicationCount), 0) FROM Job j WHERE j.recruiterProfile.id = :recruiterId")
+    long sumApplications(@Param("recruiterId") Long recruiterId);
+
     @Query(value = """
             Select j FROM Job j WHERE
                         j.jobStatus ='ACTIVE'

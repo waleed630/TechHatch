@@ -47,8 +47,7 @@ const JobDetails = () => {
 
   const checkIfApplied = async () => {
     try {
-      const applications = await applicationService.getMyApplications();
-      const myApplication = applications.find((app) => app.job.jobId === parseInt(id));
+      const myApplication = await applicationService.getMyApplicationForJob(id);
       setApplication(myApplication || null);
       setHasApplied(!!myApplication);
     } catch (error) {

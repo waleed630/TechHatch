@@ -16,6 +16,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/applications")
 @RequiredArgsConstructor
@@ -54,6 +56,31 @@ public class JobApplicationController {
 
         Page<JobApplicationResponse> response = applicationService.getMyJobApplications(userPrinciple.getUsername(), status, page);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get my application for one job (candidate), 204 when the candidate has not applied
+     */
+    @GetMapping("/my-applications/job/{jobId}")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<JobApplicationResponse> getMyApplicationForJob(
+            @AuthenticationPrincipal UserPrinciple userPrinciple,
+            @PathVariable Long jobId){
+
+        return applicationService.getMyApplicationForJob(userPrinciple.getUsername(), jobId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    /**
+     * Get totals of my applications for the dashboard (candidate)
+     */
+    @GetMapping("/my-stats")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<Map<String, Long>> getMyApplicationStats(
+            @AuthenticationPrincipal UserPrinciple userPrinciple){
+
+        return ResponseEntity.ok(applicationService.getMyApplicationStats(userPrinciple.getUsername()));
     }
 
     /**

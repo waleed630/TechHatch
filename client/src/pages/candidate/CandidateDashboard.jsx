@@ -15,6 +15,7 @@ const CandidateDashboard = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [applications, setApplications] = useState([]);
+  const [stats, setStats] = useState({ total: 0, pending: 0, interviews: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,12 +25,14 @@ const CandidateDashboard = () => {
   const fetchData = async () => {
     let timerId = null;
     try {
-      const [profileData, applicationsData] = await Promise.all([
+      const [profileData, applicationsData, statsData] = await Promise.all([
         profileService.getCandidateProfile().catch(() => null),
         applicationService.getMyApplications(),
+        applicationService.getMyStats(),
       ]);
       setProfile(profileData);
       setApplications(applicationsData);
+      setStats(statsData);
     } catch (error) {
       toast.error('Failed to load dashboard data');
     } finally {
@@ -40,11 +43,6 @@ const CandidateDashboard = () => {
     }
   };
 
-  const stats = {
-    total: applications.length,
-    pending: applications.filter((a) => a.status === 'APPLIED' || a.status === 'UNDER_REVIEW').length,
-    interviews: applications.filter((a) => a.status === 'INTERVIEW').length,
-  };
 
   if (loading) {
     return (

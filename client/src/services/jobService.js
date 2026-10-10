@@ -33,6 +33,12 @@ export const jobService = {
     return response.data;
   },
 
+  // Totals over all of the recruiter's jobs: { totalJobs, activeJobs, totalApplications }
+  getMyJobStats: async () => {
+    const response = await api.get('/api/v1/jobs/my-stats');
+    return response.data;
+  },
+
   closeJob: async (id) => {
     const response = await api.patch(`/api/v1/jobs/${id}/close`);
     return response.data;

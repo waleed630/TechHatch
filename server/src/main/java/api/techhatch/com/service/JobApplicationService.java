@@ -23,7 +23,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -118,6 +122,34 @@ public class JobApplicationService {
         Page<JobApplication> applications = applicationRepo.findCandidateApplications(candidateProfile.getId(), status, pageable);
 
         return applications.map(a -> mapToResponse(a, true, false));
+    }
+
+    /**
+     * Get the candidate's own application for one job, empty when they have not applied
+     */
+    @Transactional(readOnly = true)
+    public Optional<JobApplicationResponse> getMyApplicationForJob(String email, Long jobId) {
+
+        return candidateProfileRepo.findByUserEmail(email)
+                .flatMap(candidate -> applicationRepo.findByJobIdAndCandidateProfileId(jobId, candidate.getId()))
+                .map(a -> mapToResponse(a, true, false));
+    }
+
+    /**
+     * Totals for the candidate dashboard, counted over all applications and not only one page
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Long> getMyApplicationStats(String email) {
+
+        Map<String, Long> stats = new LinkedHashMap<>();
+        Long candidateId = candidateProfileRepo.findByUserEmail(email).map(CandidateProfile::getId).orElse(null);
+
+        stats.put("total", candidateId == null ? 0 : applicationRepo.countByCandidateProfileId(candidateId));
+        stats.put("pending", candidateId == null ? 0 : applicationRepo.countByCandidateProfileIdAndStatusIn(
+                candidateId, List.of(JobApplication.Status.APPLIED, JobApplication.Status.UNDER_REVIEW)));
+        stats.put("interviews", candidateId == null ? 0 : applicationRepo.countByCandidateProfileIdAndStatusIn(
+                candidateId, List.of(JobApplication.Status.INTERVIEW)));
+        return stats;
     }
 
     /**

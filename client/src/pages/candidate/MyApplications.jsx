@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { applicationService } from '../../services/applicationService';
 import Navbar from '../../components/common/Navbar';
 import StatusBadge from '../../components/common/StatusBadge';
+import Pagination from '../../components/common/Pagination';
 import { formatDate } from '../../utils/formatters';
 import { JOB_TYPES } from '../../utils/constants';
 import { Briefcase } from 'lucide-react';
@@ -12,16 +13,19 @@ import { Button } from '../../components/ui/button';
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchApplications();
-  }, []);
+  }, [page]);
 
   const fetchApplications = async () => {
     try {
-      const data = await applicationService.getMyApplications();
-      setApplications(data);
+      const data = await applicationService.getMyApplicationsPage(page);
+      setApplications(data.content || []);
+      setTotalPages(data.totalPages || 0);
     } catch (error) {
       toast.error('Failed to load applications');
     } finally {
@@ -115,6 +119,7 @@ const MyApplications = () => {
                 </div>
               </div>
             ))}
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}
       </div>

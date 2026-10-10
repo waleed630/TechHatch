@@ -15,6 +15,7 @@ const RecruiterDashboard = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [jobs, setJobs] = useState([]);
+  const [stats, setStats] = useState({ activeJobs: 0, totalApplications: 0, totalJobs: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,12 +25,14 @@ const RecruiterDashboard = () => {
   const fetchData = async () => {
     let timerId = null;
     try {
-      const [profileData, jobsData] = await Promise.all([
+      const [profileData, jobsData, statsData] = await Promise.all([
         profileService.getRecruiterProfile(user.userId).catch(() => null),
         jobService.getMyJobs(),
+        jobService.getMyJobStats(),
       ]);
       setProfile(profileData);
       setJobs(jobsData.content || []);
+      setStats(statsData);
     } catch (error) {
       toast.error('Failed to load dashboard data', {id:"failed"});
     } finally{
@@ -40,11 +43,6 @@ const RecruiterDashboard = () => {
     }
   };
 
-  const stats = {
-    activeJobs: jobs.filter((j) => j.status === 'ACTIVE').length,
-    totalApplications: jobs.reduce((sum, j) => sum + (j.applicationCount || 0), 0),
-    totalJobs: jobs.length,
-  };
 
   if (loading) {
     return (

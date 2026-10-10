@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -96,6 +97,17 @@ public class JobController {
         String email = userPrinciple.getUsername();
         Page<JobResponse> jobs = jobService.getMyJobs(email, page);
         return ResponseEntity.ok(jobs);
+    }
+
+    /**
+     * Get totals of my posted jobs for the dashboard (Recruiter only)
+     */
+    @GetMapping("/my-stats")
+    @PreAuthorize("hasRole('RECRUITER')")
+    public ResponseEntity<Map<String, Long>> getMyJobStats(
+            @AuthenticationPrincipal UserPrinciple userPrinciple) {
+
+        return ResponseEntity.ok(jobService.getMyJobStats(userPrinciple.getUsername()));
     }
 
     /**

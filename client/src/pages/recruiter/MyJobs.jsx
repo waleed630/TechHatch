@@ -4,6 +4,7 @@ import { jobService } from '../../services/jobService';
 import Navbar from '../../components/common/Navbar';
 import { Button } from '../../components/ui/button';
 import StatusBadge from '../../components/common/StatusBadge';
+import Pagination from '../../components/common/Pagination';
 import { formatDate } from '../../utils/formatters';
 import { Briefcase, Edit, Trash2, Eye, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -11,15 +12,23 @@ import toast from 'react-hot-toast';
 const MyJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [page]);
 
   const fetchJobs = async () => {
     try {
-      const data = await jobService.getMyJobs();
+      const data = await jobService.getMyJobs(page);
+      // Deleting the last job of a page leaves it empty, so step back one page
+      if ((data.content || []).length === 0 && page > 0) {
+        setPage(page - 1);
+        return;
+      }
       setJobs(data.content || []);
+      setTotalPages(data.totalPages || 0);
     } catch (error) {
       toast.error('Failed to load jobs');
     } finally {
@@ -140,6 +149,7 @@ const MyJobs = () => {
                 </div>
               </div>
             ))}
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}
       </div>
