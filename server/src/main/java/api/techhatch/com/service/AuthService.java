@@ -157,18 +157,21 @@ public class AuthService {
      */
     public OtpSentResponse forgotPassword(String email){
 
-        Users user = userRepo.findUserByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("No account found with this email"));
+        //the answer is the same whether the email is registered or not,
+        //so this endpoint cannot be used to find out who has an account
+        Optional<Users> user = userRepo.findUserByEmail(email);
 
-        //generate and send otp
-        otpService.generateAndSendOtp(user.getEmail(), OtpVerification.OtpPurpose.PASSWORD_RESET);
+        if(user.isPresent()){
+            //generate and send otp
+            otpService.generateAndSendOtp(user.get().getEmail(), OtpVerification.OtpPurpose.PASSWORD_RESET);
 
-        log.info("OTP sent to {}, purpose {}", user.getEmail(), OtpVerification.OtpPurpose.PASSWORD_RESET);
+            log.info("OTP sent to {}, purpose {}", user.get().getEmail(), OtpVerification.OtpPurpose.PASSWORD_RESET);
+        }
 
         return OtpSentResponse.builder()
                 .success(true)
-                .email(user.getEmail())
-                .message("Password reset OTP sent to "+user.getEmail())
+                .email(email)
+                .message("If an account exists for this email, a password reset OTP has been sent to it")
                 .otpSent(true)
                 .build();
     }
@@ -178,8 +181,9 @@ public class AuthService {
      */
     public OtpSentResponse resetPassword(String email, String otpCode, String newPassword){
 
+        //an unknown email gets the same answer as a wrong otp
         Users user = userRepo.findUserByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("No account found with this email"));
+                .orElseThrow(() -> new OtpInvalidException("Invalid or expired OTP"));
 
         //verifies and marks the otp as consumed
         otpService.verifyOtp(otpCode, user.getEmail(), OtpVerification.OtpPurpose.PASSWORD_RESET);
