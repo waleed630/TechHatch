@@ -111,7 +111,7 @@ const CandidateProfile = () => {
                 value={formData.fullName}
                 onChange={handleChange}
                 required
-                placeholder="John Doe"
+                placeholder="Write your full name"
               />
             </div>
 
@@ -122,7 +122,7 @@ const CandidateProfile = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="9876543210"
+                placeholder="Enter phone number"
               />
             </div>
 
@@ -134,7 +134,7 @@ const CandidateProfile = () => {
                 value={formData.location}
                 onChange={handleChange}
                 required
-                placeholder="Bangalore, India"
+                placeholder="Enter your location"
               />
             </div>
 
@@ -146,7 +146,7 @@ const CandidateProfile = () => {
                 value={formData.skills}
                 onChange={handleChange}
                 required
-                placeholder="Java, React, Spring Boot, MySQL"
+                placeholder="Add your skills"
               />
               <p className="text-xs text-muted-foreground">
                 Separate skills with commas
@@ -162,18 +162,19 @@ const CandidateProfile = () => {
                 value={formData.experienceYears}
                 onChange={handleChange}
                 min="0"
-                placeholder="2"
+                placeholder="Enter years of experience"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="education">Education</Label>
+              <Label htmlFor="education">Education *</Label>
               <Textarea
                 id="education"
                 name="education"
                 value={formData.education}
                 onChange={handleChange}
-                placeholder="B.Tech in Computer Science"
+                required
+                placeholder="Write your education"
                 rows={3}
               />
             </div>
@@ -185,7 +186,7 @@ const CandidateProfile = () => {
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
-                placeholder="Tell us about yourself..."
+                placeholder="Write about yourself"
                 rows={4}
               />
             </div>
@@ -197,7 +198,7 @@ const CandidateProfile = () => {
                 name="linkedinUrl"
                 value={formData.linkedinUrl}
                 onChange={handleChange}
-                placeholder="https://linkedin.com/in/johndoe"
+                placeholder="Enter LinkedIn profile link"
               />
             </div>
 
@@ -208,7 +209,7 @@ const CandidateProfile = () => {
                 name="githubUrl"
                 value={formData.githubUrl}
                 onChange={handleChange}
-                placeholder="https://github.com/johndoe"
+                placeholder="Enter GitHub profile link"
               />
             </div>
 
@@ -219,7 +220,7 @@ const CandidateProfile = () => {
                 name="portfolioUrl"
                 value={formData.portfolioUrl}
                 onChange={handleChange}
-                placeholder="https://johndoe.dev"
+                placeholder="Enter portfolio link"
               />
             </div>
 
