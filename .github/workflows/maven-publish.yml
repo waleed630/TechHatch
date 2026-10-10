@@ -23,6 +23,11 @@ jobs:
           java-version: '21'
           cache: 'maven'   
 
+      # the context test needs a MySQL database, so only the unit tests run here
+      - name: Run unit tests
+        working-directory: server
+        run: mvn -B test -Dtest='!TechhatchApplicationTests'
+
       - name: Build with maven (skip tests)
         working-directory: server
         run: mvn -B package -DskipTests
