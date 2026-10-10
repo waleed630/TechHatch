@@ -23,6 +23,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -32,6 +34,7 @@ public class JobApplicationService {
     private final JobRepo jobRepo;
     private final CandidateProfileRepo candidateProfileRepo;
     private final RecruiterProfileRepo recruiterProfileRepo;
+    private final NotificationMailService notificationMailService;
     private static final int PAGE_SIZE = 15;
 
     /**
@@ -216,14 +219,19 @@ public class JobApplicationService {
         JobApplication.Status newStatus = parseStatus(request.getStatus());
         if (newStatus == null) throw new ResourceNotFoundException("Invalid application status");
 
+        boolean changed = application.getStatus() != newStatus
+                || !Objects.equals(normalize(application.getRecruiterNotes()), normalize(request.getRecruiterNotes()));
+
         // Update status
         application.setStatus(newStatus);
         application.setRecruiterNotes(request.getRecruiterNotes());
 
         JobApplication updated = applicationRepo.save(application);
 
-        // TODO: Send notification to candidate (Day 7)
-        // TODO: Send email to candidate about status change (Day 7)
+        //email the candidate only when something actually changed
+        if (changed) {
+            notificationMailService.sendApplicationStatusEmail(updated);
+        }
 
         JobApplicationResponse response = mapToResponse(updated, true, true);
         response.setMessage("Application status updated successfully");
@@ -272,6 +280,11 @@ public class JobApplicationService {
         }
 
         return builder.build();
+    }
+
+    //empty and missing notes are the same thing
+    private String normalize(String notes){
+        return notes == null || notes.isBlank() ? null : notes.trim();
     }
 
     private JobApplication.Status parseStatus(String statusFilter){
