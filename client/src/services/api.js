@@ -2,7 +2,7 @@ import axios from 'axios';
 import { isTokenExpired } from '../utils/jwtUtils';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-const RETRY_LIMIT = 5
+const RETRY_LIMIT = 2
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -51,10 +51,13 @@ api.interceptors.response.use(
       redirectToLogin();
     }
     
-    if (!error.response || error.response.status >= 500){
-    
-      const config = error.config;
-      
+    const config = error.config;
+
+    // Only safe (GET) requests are retried, so a form is never submitted twice
+    const canRetry = config && (config.method || 'get').toLowerCase() === 'get';
+
+    if (canRetry && (!error.response || error.response.status >= 500)){
+
       if(!config._retryCount) {
         config._retryCount=0;
       }
