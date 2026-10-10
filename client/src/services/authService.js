@@ -46,6 +46,21 @@ export const authService = {
     return response.data;
   },
 
+  forgotPassword: async (email) => {
+    const response = await api.post('/api/v1/auth/forgot-password', { email });
+    // Response format: { success, email, message, otpSent, error }
+    return response.data;
+  },
+
+  resetPassword: async (email, otpCode, newPassword) => {
+    const response = await api.post('/api/v1/auth/reset-password', {
+      email,
+      otpCode,
+      newPassword,
+    });
+    return response.data;
+  },
+
   getCurrentUser: async () => {
     const response = await api.get('/api/v1/auth/me');
     return response.data;

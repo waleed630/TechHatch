@@ -147,6 +147,51 @@ public class AuthService {
                 .build();
     }
 
+    /**
+     * Sends a password reset otp to the user's email, works for every role
+     */
+    public OtpSentResponse forgotPassword(String email){
+
+        Users user = userRepo.findUserByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("No account found with this email"));
+
+        //generate and send otp
+        otpService.generateAndSendOtp(user.getEmail(), OtpVerification.OtpPurpose.PASSWORD_RESET);
+
+        log.info("OTP sent to {}, purpose {}", user.getEmail(), OtpVerification.OtpPurpose.PASSWORD_RESET);
+
+        return OtpSentResponse.builder()
+                .success(true)
+                .email(user.getEmail())
+                .message("Password reset OTP sent to "+user.getEmail())
+                .otpSent(true)
+                .build();
+    }
+
+    /**
+     * Verifies the password reset otp and sets the new password
+     */
+    public OtpSentResponse resetPassword(String email, String otpCode, String newPassword){
+
+        Users user = userRepo.findUserByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("No account found with this email"));
+
+        //verifies and marks the otp as consumed
+        otpService.verifyOtp(otpCode, user.getEmail(), OtpVerification.OtpPurpose.PASSWORD_RESET);
+
+        user.setPassword(encoder.encode(newPassword));
+        userRepo.save(user);
+
+        log.info("Password reset for {}", user.getEmail());
+
+        return OtpSentResponse.builder()
+                .success(true)
+                .email(user.getEmail())
+                .message("Password reset successfully. Please login with your new password")
+                .otpSent(false)
+                .build();
+    }
+
     public RegisterResponse verifyUserRegistration(String email, String otpCode, OtpVerification.OtpPurpose otpPurpose){
 
         //if the user is already verified then return user

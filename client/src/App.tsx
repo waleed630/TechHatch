@@ -12,6 +12,7 @@ import PublicRoute from "./components/common/PublicRoute";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 
 // Candidate Pages
@@ -58,6 +59,7 @@ const App = () => (
               <PublicRoute type="register">
                 <Register />
               </PublicRoute>} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/jobs" element={<JobSearch />} />
             <Route path="/jobs/:id" element={<JobDetails />} />
 

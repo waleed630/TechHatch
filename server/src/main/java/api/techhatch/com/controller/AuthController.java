@@ -1,7 +1,9 @@
 package api.techhatch.com.controller;
 
+import api.techhatch.com.dto.request.ForgotPasswordRequest;
 import api.techhatch.com.dto.request.LoginRequest;
 import api.techhatch.com.dto.request.RegisterRequest;
+import api.techhatch.com.dto.request.ResetPasswordRequest;
 import api.techhatch.com.dto.response.AuthResponse;
 import api.techhatch.com.dto.response.OtpSentResponse;
 import api.techhatch.com.model.UserPrinciple;
@@ -32,6 +34,20 @@ public class AuthController {
     public ResponseEntity<AuthResponse> loginUser(@RequestBody @Valid LoginRequest request){
 
         AuthResponse response = service.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<OtpSentResponse> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request){
+
+        OtpSentResponse response = service.forgotPassword(request.getEmail());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<OtpSentResponse> resetPassword(@RequestBody @Valid ResetPasswordRequest request){
+
+        OtpSentResponse response = service.resetPassword(request.getEmail(), request.getOtpCode(), request.getNewPassword());
         return ResponseEntity.ok(response);
     }
 
