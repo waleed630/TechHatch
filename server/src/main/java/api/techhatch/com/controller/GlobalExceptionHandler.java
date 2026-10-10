@@ -164,6 +164,26 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles too many login attempts or OTP requests (429)
+     */
+    @ExceptionHandler({TooManyAttemptsException.class, OtpRateLimitExceededException.class})
+    public ResponseEntity<ErrorResponse> handleTooManyAttempts(
+            RuntimeException ex,
+            WebRequest request){
+
+        ErrorResponse error = ErrorResponse.builder()
+                .success(false)
+                .message(ex.getMessage())
+                .status(HttpStatus.TOO_MANY_REQUESTS.value())
+                .error(HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase())
+                .path(getPath(request))
+                .timeStamp(LocalDateTime.now().toString())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(error);
+    }
+
+    /**
      * Handles uploads that are too large or sent without a file (400)
      */
     @ExceptionHandler({MaxUploadSizeExceededException.class, MultipartException.class, MissingServletRequestPartException.class})

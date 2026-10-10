@@ -38,6 +38,7 @@ public class AuthService {
     private final BCryptPasswordEncoder encoder;
     private final AuthenticationManager authManager;
     private final OtpService otpService;
+    private final LoginAttemptService loginAttemptService;
 
     public OtpSentResponse register(RegisterRequest request){
 
@@ -114,11 +115,16 @@ public class AuthService {
 
     public AuthResponse login(@Valid LoginRequest request) {
 
+        //too many wrong passwords block the email for a while
+        loginAttemptService.checkNotLocked(request.getEmail());
+
         try {
             authManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         }catch (BadCredentialsException | DisabledException ex){
+            loginAttemptService.recordFailure(request.getEmail());
             throw new UnauthorizedException("Invalid email or password");
         }
+        loginAttemptService.recordSuccess(request.getEmail());
 
         Users user = userRepo.findUserByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid email or password"));
@@ -180,6 +186,9 @@ public class AuthService {
 
         user.setPassword(encoder.encode(newPassword));
         userRepo.save(user);
+
+        //a fresh password also lifts a login block
+        loginAttemptService.recordSuccess(user.getEmail());
 
         log.info("Password reset for {}", user.getEmail());
 
