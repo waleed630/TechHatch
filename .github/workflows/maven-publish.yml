@@ -37,21 +37,19 @@ jobs:
     name : Builds docker image
     needs: build-jar
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name : checkout repo
         uses : actions/checkout@v4
 
-      - name : download artifact
-        uses : actions/download-artifact@v4
-        with :
-          name : techhatch-jar
-          path : server/target/
-
       - name : Login to GHCR
-        run : echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+        run : echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name : Build docker image
-        run : docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/techhatch-app:latest server/ 
+        run : docker build -t ghcr.io/${{ github.repository_owner }}/techhatch-app:latest server/
 
       - name : Push to GHCR
-        run : docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/techhatch-app:latest
+        if : github.event_name == 'push'
+        run : docker push ghcr.io/${{ github.repository_owner }}/techhatch-app:latest
