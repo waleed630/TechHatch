@@ -113,31 +113,12 @@ public class AuthService {
     }
 
 
-    public OtpSentResponse login(@Valid LoginRequest request) {
+    public AuthResponse login(@Valid LoginRequest request) {
 
-        if(isAuthenticated()){
-            return OtpSentResponse.builder()
-                    .success(false)
-                    .email(request.getEmail())
-                    .message("User is already authenticated")
-                    .otpSent(false)
-                    .build();
-        }
-        final Authentication authentication;
         try {
-            authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+            authManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         }catch (BadCredentialsException | DisabledException ex){
-            throw new UnauthorizedException(ex.getMessage());
-        }
-
-        if(!authentication.isAuthenticated()){
-            return OtpSentResponse.builder()
-                    .success(false)
-                    .email(request.getEmail())
-                    .message("Login failed")
-                    .error("Login failed")
-                    .otpSent(false)
-                    .build();
+            throw new UnauthorizedException("Invalid email or password");
         }
 
         Users user = userRepo.findUserByEmail(request.getEmail())
@@ -154,19 +135,15 @@ public class AuthService {
             throw new ResourceNotFoundException("Account is suspended, try again after 15mins");
         }
 
-        //check for rate limits
-        otpService.checkRateLimit(request.getEmail());
+        //email was verified with an otp at registration, so issue the token directly
+        String token = jwtUtil.generateToken(user.getEmail(),user.getRole().toString(),user.getId());
 
-        //generate and send otp for verification
-        otpService.generateAndSendOtp(request.getEmail(), OtpVerification.OtpPurpose.LOGIN);
-
-        log.info("OTP sent to {}, purpose {}", request.getEmail(), OtpVerification.OtpPurpose.LOGIN);
-
-        return OtpSentResponse.builder()
-                .success(true)
-                .email(request.getEmail())
-                .message("Login initiated. Please check your email for OTP")
-                .otpSent(true)
+        return AuthResponse.builder()
+                .token(token)
+                .email(user.getEmail())
+                .role(user.getRole().toString())
+                .userId(user.getId())
+                .message("Users Logged in Successfully")
                 .build();
     }
 

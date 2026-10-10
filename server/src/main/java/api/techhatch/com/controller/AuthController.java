@@ -29,9 +29,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<OtpSentResponse> loginUser(@RequestBody @Valid LoginRequest request){
+    public ResponseEntity<AuthResponse> loginUser(@RequestBody @Valid LoginRequest request){
 
-        OtpSentResponse response = service.login(request);
+        AuthResponse response = service.login(request);
         return ResponseEntity.ok(response);
     }
 

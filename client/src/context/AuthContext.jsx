@@ -45,9 +45,20 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    // Now only sends OTP, doesn't authenticate
     const data = await authService.login(email, password);
-    return data;
+    const decoded = jwtDecode(data.token);
+    localStorage.setItem('token', data.token);
+    setUser({
+      userId: decoded.userId,
+      email: decoded.sub,
+      role: decoded.role,
+      token: data.token,
+    });
+    // Return user data with role for navigation logic
+    return {
+      ...data,
+      role: decoded.role,
+    };
   };
 
   const verifyLoginOTP = async (email, otpCode) => {

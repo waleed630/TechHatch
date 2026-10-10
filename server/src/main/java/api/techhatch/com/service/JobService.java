@@ -37,7 +37,7 @@ public class JobService {
     public JobResponse postJob(String email, JobCreateRequest request){
 
         RecruiterProfile recruiterProfile = recruiterRepo.findByUserEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Please complete your company profile before posting a job"));
 
         Job job = Job.builder()
                 .recruiterProfile(recruiterProfile)
@@ -112,16 +112,19 @@ public class JobService {
     @Transactional(readOnly = true)
     public Page<JobResponse> getMyJobs(String email, int page){
 
-        RecruiterProfile recruiterProfile = recruiterRepo.findByUserEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
-
         Pageable pageable = PageRequest.of(
                 page,
                 PAGE_SZE,
                 Sort.by(Sort.Direction.DESC, "postedDate"));
 
+        //a recruiter without a profile has no jobs yet
+        Optional<RecruiterProfile> recruiterProfile = recruiterRepo.findByUserEmail(email);
+        if (recruiterProfile.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
         //find jobs posted by recruiter
-        Page<Job> jobs = jobRepo.findByRecruiterProfileId(recruiterProfile.getId(), pageable);
+        Page<Job> jobs = jobRepo.findByRecruiterProfileId(recruiterProfile.get().getId(), pageable);
 
         return jobs.map(this::mapToResponse);
     }

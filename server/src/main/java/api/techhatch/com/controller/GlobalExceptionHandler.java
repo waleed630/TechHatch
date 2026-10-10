@@ -98,7 +98,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles validation exceptions (401)
+     * Handles validation exceptions (400)
      * Triggered by @Valid annotation
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -114,14 +114,14 @@ public class GlobalExceptionHandler {
 
         ErrorResponse response = ErrorResponse.builder()
                 .success(false)
-                .message("Validation failed")
-                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                .status(HttpStatus.UNAUTHORIZED.value())
+                .message(errors.isEmpty() ? "Validation failed" : String.join(". ", errors))
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .details(errors)
                 .path(getPath(request))
                 .timeStamp(LocalDateTime.now().toString())
                 .build();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     /**
@@ -151,13 +151,13 @@ public class GlobalExceptionHandler {
         ErrorResponse error = ErrorResponse.builder()
                 .success(false)
                 .message(ex.getMessage())
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .path(getPath(request))
                 .timeStamp(LocalDateTime.now().toString())
                 .build();
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     /**

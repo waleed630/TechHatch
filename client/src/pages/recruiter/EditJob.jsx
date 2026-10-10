@@ -78,7 +78,7 @@ const EditJob = () => {
         salaryMin: parseFloat(formData.salaryMin) || 0,
         salaryMax: parseFloat(formData.salaryMax) || 0,
         requiredSkills: formData.requiredSkills.split(',').map((s) => s.trim()).filter((s) => s),
-        expiryDate: new Date(formData.expiryDate).toISOString(),
+        expiryDate: formData.expiryDate ? new Date(formData.expiryDate).toISOString() : null,
       };
 
       await jobService.updateJob(id, jobData);

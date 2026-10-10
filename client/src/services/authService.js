@@ -16,7 +16,7 @@ export const authService = {
       email,
       password,
     });
-    // Response format: { success, email, message, otpSent, error }
+    // Response format: { token, userId, email, role, message }
     return response.data;
   },
 

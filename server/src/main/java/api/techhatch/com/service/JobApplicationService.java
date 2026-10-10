@@ -99,13 +99,16 @@ public class JobApplicationService {
     @Transactional(readOnly = true)
     public Page<JobApplicationResponse> getMyJobApplications(String email, String statusFilter, int page) {
 
-        CandidateProfile candidateProfile = candidateProfileRepo.findByUserEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Candidate profile not found"));
-
         Pageable pageable = PageRequest.of(
                 page,
                 PAGE_SIZE,
                 Sort.by(Sort.Direction.DESC, "appliedDate"));
+
+        //a candidate without a profile has no applications yet
+        CandidateProfile candidateProfile = candidateProfileRepo.findByUserEmail(email).orElse(null);
+        if (candidateProfile == null) {
+            return Page.empty(pageable);
+        }
 
         JobApplication.Status status = parseStatus(statusFilter);
 

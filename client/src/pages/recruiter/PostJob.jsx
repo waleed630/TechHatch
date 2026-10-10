@@ -46,7 +46,7 @@ const PostJob = () => {
         salaryMin: parseFloat(formData.salaryMin) || 0,
         salaryMax: parseFloat(formData.salaryMax) || 0,
         requiredSkills: formData.requiredSkills.split(',').map((s) => s.trim()).filter((s) => s),
-        expiryDate: new Date(formData.expiryDate).toISOString(),
+        expiryDate: formData.expiryDate ? new Date(formData.expiryDate).toISOString() : null,
       };
 
       await jobService.createJob(jobData);
@@ -80,6 +80,7 @@ const PostJob = () => {
                   value={formData.title}
                   onChange={handleChange}
                   required
+                  minLength={5}
                   placeholder="Senior Backend Developer"
                 />
               </div>
@@ -92,7 +93,8 @@ const PostJob = () => {
                   value={formData.description}
                   onChange={handleChange}
                   required
-                  placeholder="Describe the role and what the company does..."
+                  minLength={50}
+                  placeholder="Describe the role and what the company does (at least 50 characters)..."
                   rows={5}
                 />
               </div>
