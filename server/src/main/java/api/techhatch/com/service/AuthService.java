@@ -47,17 +47,16 @@ public class AuthService {
 
         //check if there is a pending registration
         Optional<PendingRegistration> pendingUserRegistration = pendingRegistrationRepo.findByEmail(request.getEmail());
-        //if the pending registration is expired delete
-        pendingUserRegistration.ifPresent(p -> {
-            if(p.isExpired()){
-                pendingRegistrationRepo.delete(pendingUserRegistration.get());
-                throw new UnauthorizedException("Registration expired. Please register again");
-            }
-        });
+        //an expired pending registration is removed, the user simply starts again
+        if(pendingUserRegistration.isPresent() && pendingUserRegistration.get().isExpired()){
+            pendingRegistrationRepo.delete(pendingUserRegistration.get());
+            pendingRegistrationRepo.flush();
+            pendingUserRegistration = Optional.empty();
+        }
 
         PendingRegistration pendingRegistration;
 
-        if(pendingUserRegistration.isPresent() && !pendingUserRegistration.get().isExpired()){
+        if(pendingUserRegistration.isPresent()){
             pendingRegistration = pendingUserRegistration.get();
 
             otpService.checkRateLimit(pendingRegistration.getEmail());
@@ -212,8 +211,8 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("No pending registration found. Please register again"));
 
 
+        //the expired record is cleaned up when the user registers again
         if(pendingRegistration.isExpired()){
-            pendingRegistrationRepo.delete(pendingRegistration);
             throw new UnauthorizedException("Registration expired. Please register again");
         }
 
