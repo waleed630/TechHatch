@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { jobService } from '../../services/jobService';
 import { applicationService } from '../../services/applicationService';
 import Navbar from '../../components/common/Navbar';
+import StatusBadge from '../../components/common/StatusBadge';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
 import { Label } from '../../components/ui/label';
@@ -22,6 +23,7 @@ const JobDetails = () => {
   const [applying, setApplying] = useState(false);
   const [coverLetter, setCoverLetter] = useState('');
   const [hasApplied, setHasApplied] = useState(false);
+  const [application, setApplication] = useState(null);
 
   useEffect(() => {
     fetchJob();
@@ -45,8 +47,9 @@ const JobDetails = () => {
   const checkIfApplied = async () => {
     try {
       const applications = await applicationService.getMyApplications();
-      const applied = applications.some((app) => app.job.jobId === parseInt(id));
-      setHasApplied(applied);
+      const myApplication = applications.find((app) => app.job.jobId === parseInt(id));
+      setApplication(myApplication || null);
+      setHasApplied(!!myApplication);
     } catch (error) {
       // Ignore error
     }
@@ -75,6 +78,7 @@ const JobDetails = () => {
       toast.success('Application submitted successfully!');
       setHasApplied(true);
       setCoverLetter('');
+      checkIfApplied();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to submit application');
     } finally {
@@ -207,14 +211,38 @@ const JobDetails = () => {
 
               {user?.role === 'CANDIDATE' && (
                 <div className="rounded-lg border bg-card p-6">
-                  <h3 className="mb-4 text-lg font-semibold">Apply for this job</h3>
+                  <h3 className="mb-4 text-lg font-semibold">{hasApplied ? 'Your Application' : 'Apply for this job'}</h3>
                   
                   {hasApplied ? (
-                    <div className="rounded-lg bg-green-50 p-4 text-center">
-                      <p className="font-medium text-green-800">You have already applied for this job</p>
-                      <Link to="/candidate/applications">
-                        <Button variant="outline" className="mt-3">
-                          View Application
+                    <div className="space-y-4">
+                      <div className="rounded-lg bg-green-50 p-4 text-center">
+                        <p className="font-medium text-green-800">You have already applied for this job</p>
+                      </div>
+                      {application && (
+                        <div className="space-y-3 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Status:</span>{' '}
+                            <StatusBadge status={application.status} />
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Applied:</span>{' '}
+                            <span className="font-medium">{formatDate(application.appliedDate)}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Last Updated:</span>{' '}
+                            <span className="font-medium">{formatDate(application.lastUpdated)}</span>
+                          </div>
+                          {application.recruiterNotes && (
+                            <div className="rounded-lg bg-blue-50 p-3">
+                              <p className="text-sm font-medium text-gray-900">Recruiter Notes:</p>
+                              <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700">{application.recruiterNotes}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <Link to="/candidate/applications" className="block">
+                        <Button variant="outline" className="w-full">
+                          View All Applications
                         </Button>
                       </Link>
                     </div>
