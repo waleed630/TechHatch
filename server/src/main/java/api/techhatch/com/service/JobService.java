@@ -153,6 +153,7 @@ public class JobService {
         job.setExperienceLevel(Job.ExperienceLevel.valueOf(request.getExperienceLevel().toUpperCase()));
         job.setSalaryMin(request.getSalaryMin());
         job.setSalaryMax(request.getSalaryMax());
+        if (request.getCurrency()!=null && !request.getCurrency().isBlank()) job.setCurrency(request.getCurrency());
         job.setRequiredSkills(convertSkillsToJson(request.getRequiredSkills()));
         if (request.getExpiryDate()!=null) job.setExpiryDate(request.getExpiryDate());
 

@@ -63,7 +63,7 @@ public class Job {
     private JobStatus jobStatus=JobStatus.ACTIVE;
     @Column(name = "posted_date", updatable = false, nullable = false)
     private LocalDateTime postedDate;
-    @Column(name = "expiry_date", updatable = false)
+    @Column(name = "expiry_date")
     private LocalDateTime expiryDate;
     @Column(name = "view_count")
     private Integer viewCount;
