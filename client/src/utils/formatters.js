@@ -23,10 +23,10 @@ export const formatDateRelative = (dateString) => {
 
 export const formatSalary = (min, max, currency = 'INR') => {
   const formatAmount = (amount) => {
-    if (amount >= 100000) {
+    if (currency === 'INR' && amount >= 100000) {
       return `${(amount / 100000).toFixed(1)} LPA`;
     }
-    return `${amount.toLocaleString('en-IN')}`;
+    return `${amount.toLocaleString(currency === 'INR' ? 'en-IN' : 'en-US')}`;
   };
 
   if (min && max) {
