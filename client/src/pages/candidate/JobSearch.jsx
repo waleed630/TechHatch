@@ -45,14 +45,9 @@ const JobSearch = () => {
   },[filters, pagination.page, setSearchParams]);
   
   useEffect(() => {
-    
-    if(debouncedKeyword && debouncedKeyword.trim()){
-      fetchJobs();
-    }else{
-      setJobs([]);
-      setLoading(false);
-    }
-    
+    // No keyword lists all active jobs
+    fetchJobs();
+
   }, [debouncedKeyword, filters.location, filters.jobType, filters.experienceLevel, filters.datePosted, pagination.page]);
 
   const fetchJobs = async () => {
@@ -63,13 +58,19 @@ const JobSearch = () => {
         location: filters.location,
         jobType: filters.jobType,
         experienceLevel: filters.experienceLevel,
-        datePosted: filters.datePosted,
         page: pagination.page
       };
-      
+
+      // "Last N days" is sent as the earliest posted date
+      const days = parseInt(filters.datePosted);
+      if (days > 0) {
+        const fromDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+        params.fromDate = fromDate.toISOString().slice(0, 19);
+      }
+
       // Remove empty params
       Object.keys(params).forEach((key) => {
-        if (params[key] == null || params[key] === "") delete params[key];
+        if (params[key] == null || String(params[key]).trim() === "") delete params[key];
       });
         
 

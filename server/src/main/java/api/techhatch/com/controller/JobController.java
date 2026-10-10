@@ -9,6 +9,7 @@ import io.micrometer.common.util.StringUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,15 +52,14 @@ public class JobController {
             @RequestParam(required = false) String experienceLevel,
             @RequestParam(required = false) BigDecimal minSalary,
             @RequestParam(required = false) BigDecimal maxSalary,
-            @RequestParam(required = false) LocalDateTime fromDate,
-            @RequestParam(required = false) LocalDateTime toDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
             @RequestParam(defaultValue = "0") int page) {
 
-        //if keyword is missing return with bad request - will handle this exception gracefully
-        if (StringUtils.isBlank(keyword)) return ResponseEntity.badRequest().build();
+        //a blank keyword or location lists all active jobs
         JobSearchFilter filter = new JobSearchFilter();
-        filter.setKeyword(keyword);
-        filter.setLocation(location);
+        filter.setKeyword(StringUtils.isBlank(keyword) ? null : keyword.trim());
+        filter.setLocation(StringUtils.isBlank(location) ? null : location.trim());
         filter.setJobType(jobType);
         filter.setExperienceLevel(experienceLevel);
         filter.setMinSalary(minSalary);
