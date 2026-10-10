@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
@@ -151,6 +154,30 @@ public class GlobalExceptionHandler {
         ErrorResponse error = ErrorResponse.builder()
                 .success(false)
                 .message(ex.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .path(getPath(request))
+                .timeStamp(LocalDateTime.now().toString())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
+     * Handles uploads that are too large or sent without a file (400)
+     */
+    @ExceptionHandler({MaxUploadSizeExceededException.class, MultipartException.class, MissingServletRequestPartException.class})
+    public ResponseEntity<ErrorResponse> handleUploadErrors(
+            Exception ex,
+            WebRequest request){
+
+        String message = ex instanceof MaxUploadSizeExceededException
+                ? "File is too large. Maximum size is 5 MB"
+                : "Please choose a file to upload";
+
+        ErrorResponse error = ErrorResponse.builder()
+                .success(false)
+                .message(message)
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .path(getPath(request))

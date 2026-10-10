@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { applicationService } from '../../services/applicationService';
 import { jobService } from '../../services/jobService';
+import { fileService } from '../../services/fileService';
 import Navbar from '../../components/common/Navbar';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
@@ -81,6 +82,14 @@ const JobApplications = () => {
     }))
   };
   
+  const handleViewResume = async (app) => {
+    try {
+      await fileService.openFile(app.candidate.resumeUrl, `${app.candidate.fullName} resume`);
+    } catch (error) {
+      toast.error('Failed to open resume');
+    }
+  };
+
   const handleUpdateStatus = async (appId) => {
     setUpdating(true);
     try {
@@ -204,6 +213,16 @@ const JobApplications = () => {
                         ))}
                       </div>
                     </div> */}
+
+                    <div className="mt-4">
+                      {app.candidate.resumeUrl ? (
+                        <Button variant="outline" size="sm" onClick={() => handleViewResume(app)}>
+                          View Resume
+                        </Button>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">No resume uploaded</span>
+                      )}
+                    </div>
 
                     {app.coverLetter && (
                       <div className="mt-4">

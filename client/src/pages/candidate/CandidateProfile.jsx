@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/profileService';
+import { fileService } from '../../services/fileService';
 import Navbar from '../../components/common/Navbar';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -14,6 +15,9 @@ const CandidateProfile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [profileExists, setProfileExists] = useState(false);
+  const [resumeUrl, setResumeUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -46,6 +50,8 @@ const CandidateProfile = () => {
         portfolioUrl: data.portfolioUrl || '',
         location: data.location || '',
       });
+      setProfileExists(true);
+      setResumeUrl(data.resumeUrl || '');
     } catch (error) {
       // Profile doesn't exist yet
     } finally {
@@ -58,6 +64,36 @@ const CandidateProfile = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleResumeUpload = async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Resume must be smaller than 5 MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const data = await fileService.uploadResume(file);
+      setResumeUrl(data.url);
+      toast.success(data.message || 'Resume uploaded successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to upload resume');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleViewResume = async () => {
+    try {
+      await fileService.openFile(resumeUrl);
+    } catch (error) {
+      toast.error('Failed to open resume');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -101,6 +137,37 @@ const CandidateProfile = () => {
           <p className="mb-8 text-muted-foreground">
             Complete your profile to start applying for jobs
           </p>
+
+          <div className="mb-6 space-y-3 rounded-lg border bg-card p-8">
+            <h2 className="text-xl font-semibold text-foreground">Resume</h2>
+            {!profileExists ? (
+              <p className="text-sm text-muted-foreground">
+                Save your profile first, then you can upload your resume here.
+              </p>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">PDF, DOC or DOCX, up to 5 MB</p>
+                {resumeUrl ? (
+                  <Button type="button" variant="outline" onClick={handleViewResume}>
+                    View Current Resume
+                  </Button>
+                ) : (
+                  <p className="text-sm font-medium text-foreground">No resume uploaded yet</p>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="resume">{resumeUrl ? 'Replace Resume' : 'Upload Resume'}</Label>
+                  <Input
+                    id="resume"
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleResumeUpload}
+                    disabled={uploading}
+                  />
+                  {uploading && <p className="text-xs text-muted-foreground">Uploading...</p>}
+                </div>
+              </>
+            )}
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border bg-card p-8">
             <div className="space-y-2">

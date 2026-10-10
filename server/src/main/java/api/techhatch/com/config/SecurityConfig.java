@@ -52,6 +52,8 @@ public class SecurityConfig{
                         .requestMatchers("/api/v1/auth/me").authenticated()
                         .requestMatchers("/","/api/v1/auth/**","/test","/error","/webjars/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/jobs", "/api/v1/jobs/{id:\\d+}").permitAll()
+                        //pictures and logos are public, the file service checks access to resumes
+                        .requestMatchers(HttpMethod.GET, "/api/v1/files/{id:\\d+}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling( ex -> ex

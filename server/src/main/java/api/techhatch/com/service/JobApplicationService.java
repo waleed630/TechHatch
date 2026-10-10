@@ -265,6 +265,7 @@ public class JobApplicationService {
                     .email(candidate.getUser().getEmail())
                     .phone(candidate.getPhone())
                     .resumeUrl(candidate.getResumeUrl())
+                    .profilePictureUrl(candidate.getProfilePictureUrl())
                     .experienceYears(candidate.getExperienceYears())
                     .location(candidate.getLocation())
                     .build());

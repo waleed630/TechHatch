@@ -75,7 +75,8 @@ public class RecruiterProfileService {
         profile.setCompanyName(request.getCompanyName());
         profile.setCompanyDescription(request.getCompanyDescription());
         profile.setPhone(request.getPhone());
-        profile.setCompanyLogoUrl(request.getCompanyLogoUrl());
+        //the logo is set by the upload, saving the form must not remove it
+        if (request.getCompanyLogoUrl() != null) profile.setCompanyLogoUrl(request.getCompanyLogoUrl());
         profile.setCompanyWebsite(request.getCompanyWebsite());
         profile.setCompanySize(request.getCompanySize());
         profile.setIndustry(request.getIndustry());
