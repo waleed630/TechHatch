@@ -19,12 +19,12 @@ const PostJob = () => {
     requirements: '',
     responsibilities: '',
     location: '',
-    jobType: 'FULL_TIME',
-    workMode: 'HYBRID',
-    experienceLevel: 'MID',
+    jobType: '',
+    workMode: '',
+    experienceLevel: '',
     salaryMin: '',
     salaryMax: '',
-    currency: 'INR',
+    currency: '',
     requiredSkills: '',
     expiryDate: '',
   });
@@ -38,6 +38,12 @@ const PostJob = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.jobType || !formData.workMode || !formData.experienceLevel || !formData.currency) {
+      toast.error('Please select job type, work mode, experience level and currency');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -81,7 +87,7 @@ const PostJob = () => {
                   onChange={handleChange}
                   required
                   minLength={5}
-                  placeholder="Senior Backend Developer"
+                  placeholder="Write job title"
                 />
               </div>
 
@@ -94,7 +100,7 @@ const PostJob = () => {
                   onChange={handleChange}
                   required
                   minLength={50}
-                  placeholder="Describe the role and what the company does (at least 50 characters)..."
+                  placeholder="Write job description (at least 50 characters)"
                   rows={5}
                 />
               </div>
@@ -107,7 +113,7 @@ const PostJob = () => {
                   value={formData.requirements}
                   onChange={handleChange}
                   required
-                  placeholder="List the qualifications and experience needed..."
+                  placeholder="Write job requirements"
                   rows={5}
                 />
               </div>
@@ -120,7 +126,7 @@ const PostJob = () => {
                   value={formData.responsibilities}
                   onChange={handleChange}
                   required
-                  placeholder="Describe what the candidate will be doing..."
+                  placeholder="Write job responsibilities"
                   rows={5}
                 />
               </div>
@@ -139,7 +145,7 @@ const PostJob = () => {
                     value={formData.location}
                     onChange={handleChange}
                     required
-                    placeholder="Bangalore, India"
+                    placeholder="Enter job location"
                   />
                 </div>
 
@@ -147,7 +153,7 @@ const PostJob = () => {
                   <Label htmlFor="jobType">Job Type *</Label>
                   <Select value={formData.jobType} onValueChange={(value) => setFormData({ ...formData, jobType: value })}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select job type" />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(JOB_TYPES).map(([key, value]) => (
@@ -163,7 +169,7 @@ const PostJob = () => {
                   <Label htmlFor="workMode">Work Mode *</Label>
                   <Select value={formData.workMode} onValueChange={(value) => setFormData({ ...formData, workMode: value })}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select work mode" />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(WORK_MODES).map(([key, value]) => (
@@ -179,7 +185,7 @@ const PostJob = () => {
                   <Label htmlFor="experienceLevel">Experience Level *</Label>
                   <Select value={formData.experienceLevel} onValueChange={(value) => setFormData({ ...formData, experienceLevel: value })}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select experience level" />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(EXPERIENCE_LEVELS).map(([key, value]) => (
@@ -207,7 +213,7 @@ const PostJob = () => {
                     value={formData.salaryMin}
                     onChange={handleChange}
                     required
-                    placeholder="1200000"
+                    placeholder="Enter minimum salary"
                   />
                 </div>
 
@@ -220,15 +226,15 @@ const PostJob = () => {
                     value={formData.salaryMax}
                     onChange={handleChange}
                     required
-                    placeholder="1800000"
+                    placeholder="Enter maximum salary"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="currency">Currency</Label>
+                  <Label htmlFor="currency">Currency *</Label>
                   <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select currency" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="INR">INR</SelectItem>
@@ -247,7 +253,7 @@ const PostJob = () => {
                   value={formData.requiredSkills}
                   onChange={handleChange}
                   required
-                  placeholder="Java, Spring Boot, MySQL, AWS"
+                  placeholder="Add required skills"
                 />
                 <p className="text-xs text-muted-foreground">
                   Separate skills with commas
