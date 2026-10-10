@@ -3,6 +3,7 @@ package api.techhatch.com.service;
 import api.techhatch.com.dto.request.JobCreateRequest;
 import api.techhatch.com.dto.request.JobSearchFilter;
 import api.techhatch.com.dto.response.JobResponse;
+import api.techhatch.com.exception.BadRequestException;
 import api.techhatch.com.exception.ResourceNotFoundException;
 import api.techhatch.com.exception.UnauthorizedException;
 import api.techhatch.com.model.Job;
@@ -39,6 +40,8 @@ public class JobService {
 
         RecruiterProfile recruiterProfile = recruiterRepo.findByUserEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Please complete your company profile before posting a job"));
+
+        validateSalary(request);
 
         Job job = Job.builder()
                 .recruiterProfile(recruiterProfile)
@@ -171,6 +174,8 @@ public class JobService {
             throw new UnauthorizedException("You can only update your own job postings");
         }
 
+        validateSalary(request);
+
         // Update fields
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
@@ -236,6 +241,13 @@ public class JobService {
     }
 
     //HELPER METHODS
+
+    private void validateSalary(JobCreateRequest request) {
+        if (request.getSalaryMin() != null && request.getSalaryMax() != null
+                && request.getSalaryMin().compareTo(request.getSalaryMax()) > 0) {
+            throw new BadRequestException("Minimum salary cannot be greater than maximum salary");
+        }
+    }
 
     private Job.JobType parseJobType(String jobType) {
         if (jobType == null || jobType.isEmpty()) {

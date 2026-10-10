@@ -70,6 +70,11 @@ const EditJob = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (parseFloat(formData.salaryMin) > parseFloat(formData.salaryMax)) {
+      toast.error('Minimum salary cannot be greater than maximum salary');
+      return;
+    }
+
     setSaving(true);
 
     try {
