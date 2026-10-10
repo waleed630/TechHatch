@@ -1,0 +1,57 @@
+name: Build jar and dockerize
+
+on:
+  push:
+    branches: [main]
+    paths :
+      - 'server/**'
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-jar:
+    name: Builds jar
+    runs-on: ubuntu-latest
+    steps:
+      - name : checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK and cache Maven deps
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: 'maven'   
+
+      - name: Build with maven (skip tests)
+        working-directory: server
+        run: mvn -B package -DskipTests
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with: 
+          name: techhatch-jar
+          path: server/target/*.jar
+          
+  build-docker:
+    name : Builds docker image
+    needs: build-jar
+    runs-on: ubuntu-latest
+    steps:
+      - name : checkout repo
+        uses : actions/checkout@v4
+
+      - name : download artifact
+        uses : actions/download-artifact@v4
+        with :
+          name : techhatch-jar
+          path : server/target/
+
+      - name : Login to GHCR
+        run : echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+
+      - name : Build docker image
+        run : docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/techhatch-app:latest server/ 
+
+      - name : Push to GHCR
+        run : docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/techhatch-app:latest
