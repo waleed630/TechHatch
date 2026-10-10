@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext';
 import { jobService } from '../../services/jobService';
 import { applicationService } from '../../services/applicationService';
+import { fileService } from '../../services/fileService';
 import Navbar from '../../components/common/Navbar';
 import StatusBadge from '../../components/common/StatusBadge';
 import { Button } from '../../components/ui/button';
@@ -199,6 +200,13 @@ const JobDetails = () => {
             <div className="sticky top-6 space-y-6">
               <div className="rounded-lg border bg-card p-6">
                 <h3 className="mb-4 text-lg font-semibold">Company Information</h3>
+                {job.company.companyLogoUrl && (
+                  <img
+                    src={fileService.publicUrl(job.company.companyLogoUrl)}
+                    alt={job.company.companyName}
+                    className="mb-4 h-16 w-16 rounded-lg border object-contain"
+                  />
+                )}
                 <div className="space-y-2 text-sm">
                   <div>
                     <span className="font-medium">Company:</span> {job.company.companyName}

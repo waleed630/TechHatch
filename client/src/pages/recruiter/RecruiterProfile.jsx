@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/profileService';
+import { fileService } from '../../services/fileService';
 import Navbar from '../../components/common/Navbar';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -16,6 +17,9 @@ const RecruiterProfile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [profileExists, setProfileExists] = useState(false);
+  const [logoUrl, setLogoUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     companyName: '',
     companyDescription: '',
@@ -42,6 +46,8 @@ const RecruiterProfile = () => {
         industry: data.industry || '',
         location: data.location || '',
       });
+      setProfileExists(true);
+      setLogoUrl(data.companyLogoUrl || '');
     } catch (error) {
       // Profile doesn't exist yet
     } finally {
@@ -54,6 +60,28 @@ const RecruiterProfile = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Logo must be smaller than 2 MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const data = await fileService.uploadCompanyLogo(file);
+      setLogoUrl(data.url);
+      toast.success(data.message || 'Company logo uploaded successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to upload logo');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -91,6 +119,40 @@ const RecruiterProfile = () => {
           <p className="mb-8 text-muted-foreground">
             Complete your company profile to start posting jobs
           </p>
+
+          <div className="mb-6 space-y-3 rounded-lg border bg-card p-8">
+            <h2 className="text-xl font-semibold text-foreground">Company Logo</h2>
+            {!profileExists ? (
+              <p className="text-sm text-muted-foreground">
+                Save your company profile first, then you can upload your logo here.
+              </p>
+            ) : (
+              <div className="flex items-center gap-6">
+                {logoUrl ? (
+                  <img
+                    src={fileService.publicUrl(logoUrl)}
+                    alt="Company logo"
+                    className="h-24 w-24 rounded-lg border object-contain"
+                  />
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-lg border bg-muted text-xs text-muted-foreground">
+                    No logo
+                  </div>
+                )}
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="logo">{logoUrl ? 'Change Logo' : 'Upload Logo'}</Label>
+                  <Input
+                    id="logo"
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.webp"
+                    onChange={handleLogoUpload}
+                    disabled={uploading}
+                  />
+                  <p className="text-xs text-muted-foreground">PNG, JPG or WEBP, up to 2 MB</p>
+                </div>
+              </div>
+            )}
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border bg-card p-8">
             <div className="space-y-2">

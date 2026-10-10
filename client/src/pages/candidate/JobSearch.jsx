@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, replace, useSearchParams } from 'react-router-dom';
 import { jobService } from '../../services/jobService';
+import { fileService } from '../../services/fileService';
 import Navbar from '../../components/common/Navbar';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -220,7 +221,14 @@ const JobSearch = () => {
                       to={`/jobs/${job.id}?${searchParams.toString()}`}
                       className="block rounded-lg border bg-card p-6 transition hover:border-primary"
                     >
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-4">
+                        {job.company.companyLogoUrl && (
+                          <img
+                            src={fileService.publicUrl(job.company.companyLogoUrl)}
+                            alt={job.company.companyName}
+                            className="h-12 w-12 rounded-lg border object-contain"
+                          />
+                        )}
                         <div className="flex-1">
                           <h3 className="text-xl font-semibold text-foreground hover:text-primary">
                             {job.title}
