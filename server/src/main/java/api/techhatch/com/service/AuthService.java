@@ -42,6 +42,17 @@ public class AuthService {
 
     public OtpSentResponse register(RegisterRequest request){
 
+        //only job seekers and recruiters can sign up, never an admin
+        final Role role;
+        try {
+            role = Role.valueOf(request.getRole().trim().toUpperCase());
+        }catch (IllegalArgumentException e){
+            throw new BadRequestException("Invalid role");
+        }
+        if(role != Role.CANDIDATE && role != Role.RECRUITER){
+            throw new BadRequestException("Invalid role");
+        }
+
         if(userRepo.existsByEmail(request.getEmail())){
             throw new DuplicateResourceException("Email is already registered");
         }
@@ -64,18 +75,10 @@ public class AuthService {
 
             pendingRegistration.setPassword(encoder.encode(request.getPassword()));
             pendingRegistration.setExpiresAt(LocalDateTime.now().plusHours(24));
-            pendingRegistration.setRole(Role.valueOf(request.getRole()));
+            pendingRegistration.setRole(role);
             pendingRegistrationRepo.save(pendingRegistration);
 
         }else{
-            final Role role;
-            try {
-                role = Role.valueOf(request.getRole().toUpperCase());
-            }catch (IllegalArgumentException e){
-                throw new UnauthorizedException("Invalid role");
-            }
-
-
             pendingRegistration = PendingRegistration.builder()
                     .email(request.getEmail())
                     .password(encoder.encode(request.getPassword()))
