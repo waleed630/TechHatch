@@ -37,7 +37,7 @@ const RecruiterProfile = () => {
         companyName: data.companyName || '',
         companyDescription: data.companyDescription || '',
         phone: data.phone || '',
-        website: data.website || '',
+        companyWebsite: data.companyWebsite || '',
         companySize: data.companySize || '',
         industry: data.industry || '',
         location: data.location || '',
@@ -101,7 +101,7 @@ const RecruiterProfile = () => {
                 value={formData.companyName}
                 onChange={handleChange}
                 required
-                placeholder="Acme Corporation"
+                placeholder="Write company name"
               />
             </div>
 
@@ -113,7 +113,7 @@ const RecruiterProfile = () => {
                 value={formData.companyDescription}
                 onChange={handleChange}
                 required
-                placeholder="Tell us about your company..."
+                placeholder="Write about your company"
                 rows={4}
               />
             </div>
@@ -125,7 +125,7 @@ const RecruiterProfile = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="9876543210"
+                placeholder="Enter phone number"
               />
             </div>
 
@@ -136,12 +136,12 @@ const RecruiterProfile = () => {
                 name="companyWebsite"
                 value={formData.companyWebsite}
                 onChange={handleChange}
-                placeholder="https://example.com"
+                placeholder="Enter website link"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="companySize">Company Size</Label>
+              <Label htmlFor="companySize">Company Size *</Label>
               <Select value={formData.companySize} onValueChange={(value) => setFormData({ ...formData, companySize: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select company size" />
@@ -163,7 +163,7 @@ const RecruiterProfile = () => {
                 name="industry"
                 value={formData.industry}
                 onChange={handleChange}
-                placeholder="Information Technology"
+                placeholder="Add industry type"
               />
             </div>
 
@@ -175,7 +175,7 @@ const RecruiterProfile = () => {
                 value={formData.location}
                 onChange={handleChange}
                 required
-                placeholder="Mumbai, India"
+                placeholder="Enter company location"
               />
             </div>
 
