@@ -22,7 +22,7 @@ public class NotificationMailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
-    @Value("${spring.mail.username}")
+    @Value("${app.mail.from:${spring.mail.username}}")
     private String fromEmail;
 
     /**
