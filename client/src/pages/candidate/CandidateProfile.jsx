@@ -17,6 +17,8 @@ const CandidateProfile = () => {
   const [saving, setSaving] = useState(false);
   const [profileExists, setProfileExists] = useState(false);
   const [resumeUrl, setResumeUrl] = useState('');
+  // Resume chosen before the profile exists, uploaded together with the first save
+  const [pendingResume, setPendingResume] = useState(null);
   const [pictureUrl, setPictureUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
@@ -73,8 +75,19 @@ const CandidateProfile = () => {
     e.target.value = '';
     if (!file) return;
 
+    if (!/\.(pdf|doc|docx)$/i.test(file.name)) {
+      toast.error('Resume must be a PDF or Word file (PDF, DOC or DOCX)');
+      return;
+    }
+
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Resume must be smaller than 5 MB');
+      return;
+    }
+
+    // A new profile is not saved yet, so the file waits until Save Profile
+    if (!profileExists) {
+      setPendingResume(file);
       return;
     }
 
@@ -132,13 +145,31 @@ const CandidateProfile = () => {
       };
 
       await profileService.updateCandidateProfile(profileData);
-      toast.success('Profile updated successfully!');
-      navigate('/candidate/dashboard');
+      setProfileExists(true);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update profile');
-    } finally {
       setSaving(false);
+      return;
     }
+
+    // The resume picked while filling a new profile goes up right after the profile is saved
+    if (pendingResume) {
+      try {
+        const data = await fileService.uploadResume(pendingResume);
+        setResumeUrl(data.url);
+        setPendingResume(null);
+      } catch (error) {
+        toast.error(
+          `Profile saved, but the resume was not uploaded: ${error.response?.data?.message || 'please try again'}`
+        );
+        setSaving(false);
+        return;
+      }
+    }
+
+    toast.success('Profile updated successfully!');
+    setSaving(false);
+    navigate('/candidate/dashboard');
   };
 
   if (loading) {
@@ -195,12 +226,33 @@ const CandidateProfile = () => {
           <div className="mb-6 space-y-3 rounded-lg border bg-card p-8">
             <h2 className="text-xl font-semibold text-foreground">Resume</h2>
             {!profileExists ? (
-              <p className="text-sm text-muted-foreground">
-                Save your profile first, then you can upload your resume here.
-              </p>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">PDF or Word file (PDF, DOC or DOCX), up to 5 MB</p>
+                <Label htmlFor="resume">Upload Resume</Label>
+                <Input
+                  id="resume"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleResumeUpload}
+                  disabled={saving}
+                />
+                {pendingResume ? (
+                  <div className="flex items-center justify-between rounded-lg bg-muted p-3 text-sm">
+                    <span className="font-medium text-foreground">Selected: {pendingResume.name}</span>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setPendingResume(null)}>
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">No resume selected yet</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Your resume is uploaded when you click Save Profile below.
+                </p>
+              </div>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground">PDF, DOC or DOCX, up to 5 MB</p>
+                <p className="text-sm text-muted-foreground">PDF or Word file (PDF, DOC or DOCX), up to 5 MB</p>
                 {resumeUrl ? (
                   <Button type="button" variant="outline" onClick={handleViewResume}>
                     View Current Resume
